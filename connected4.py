@@ -1,17 +1,15 @@
 # library working with arrays --- up to 50x faster than normal list(arrays)
 import numpy as np
 import pygame
-import pygame_menu
 import sys
 import math
 import random
-from tkinter import *
-from tkinter import messagebox
 
 BLUE = pygame.Color(0, 0, 250)
 BLACK = pygame.Color(0, 0, 0)
 WHITE = (255, 255, 255)
 GREY = (211, 211, 211)
+GREY2 = (200, 200, 200)
 RED = (255, 0, 0)
 YELLOW = (255, 255, 51)
 ROW = 6
@@ -82,9 +80,9 @@ def evaluate_window(window, piece):
     if piece == PLAYER_PIECE:
         opp_piece = AI_PIECE
 
-    if window.count(piece) == 4:
-        score += 100
-    elif window.count(piece) == 3 and window.count(EMPTY) == 1:
+    # if window.count(piece) == 4:
+    #     score += 100
+    if window.count(piece) == 3 and window.count(EMPTY) == 1:
         score += 5
     elif window.count(piece) == 2 and window.count(EMPTY) == 2:
         score += 2
@@ -212,14 +210,15 @@ def draw_board(board):
 def draw_board_extend():
     draw_button(700, 450, BLACK, 300, 2, None)
     draw_button(700, 0, BLACK, 300, 2, None)
-    pygame.draw.line(screen, BLACK, (700, 2), (700, 450), 2)
-    pygame.draw.line(screen, BLACK, (998, 2), (998, 450), 2)
+    draw_button(700, 698, BLACK, 300, 2, None)
+    pygame.draw.line(screen, BLACK, (700, 2), (700, 700), 2)
+    pygame.draw.line(screen, BLACK, (998, 2), (998, 700), 2)
     draw_button(775, 500, GREY, 150, 60, 'Restart')
     draw_button(775, 600, GREY, 150, 60, 'Quit')
     draw_button(790, 100, GREY,  120, 60, 'Easy')
     draw_button(790, 200, GREY,  120, 60, 'Medium')
     draw_button(790, 300, GREY,  120, 60, 'Hard')
-    label = heading.render('CHOOSE DIFFICULTY', True, BLACK)
+    label = b_font.render('CHOOSE DIFFICULTY', True, BLACK)
     screen.blit(label, (705, 20))
 
 
@@ -236,11 +235,29 @@ def draw_button(x, y, color, width, height, text):
         label_rec.center = (x + width/2, y + height/2)
         screen.blit(label, label_rec)
 
-
 def is_button_preessed(xpos, ypos, x, y, width, height):
     return (xpos >= x and xpos <= x + width and ypos >= y and ypos <= y + height)
 
+def button_hover( posx, posy, x, y, width, height, text):
+    if (posx >= x and posx <= x + width and posy >= y and posy <= y + height):
+        pygame.draw.rect(screen, GREY2, (x, y, width, height))
+    else:
+        pygame.draw.rect(screen, GREY, (x, y, width, height))
+    if text:
+        label = text_object(text)
+        label_rec = label.get_rect()
+        label_rec.center = (x + width/2, y + height/2)
+        screen.blit(label, label_rec)
 
+
+def redraw_buttons_hover(posx, posy):
+    button_hover(posx, posy, 775, 600, 150, 60, 'Quit')
+    button_hover(posx, posy, 775, 500, 150, 60, 'Restart')
+    button_hover(posx, posy, 790, 100, 120, 60, 'Easy')
+    button_hover(posx, posy, 790, 200, 120, 60, 'Medium')
+    button_hover(posx, posy, 790, 300, 120, 60, 'Hard')
+
+    
 pygame.init()
 SQUARESIZE = 100
 width = COLUMN * SQUARESIZE
@@ -250,7 +267,6 @@ OFFSET = int(SQUARESIZE/2)
 size = (width + 300, height)
 myfont = pygame.font.SysFont("monospace", 75)
 b_font = pygame.font.SysFont('Comic Sans MS', 40)
-heading = pygame.font.SysFont('Comic Sans MS', 40)
 pygame.display.set_caption('Connected 4')
 screen = pygame.display.set_mode(size)
 screen.fill(WHITE)
@@ -273,7 +289,7 @@ def game():
 
                 if event.type == pygame.MOUSEMOTION:
                     pygame.draw.rect(screen, WHITE, (0, 0, width, SQUARESIZE))
-                    posx = event.pos[0]
+                    posx, posy = event.pos
                     if posx <= width - SQUARESIZE/2:
                         if turn == PLAYER:
                             pygame.draw.circle(
@@ -281,8 +297,8 @@ def game():
                         else:
                             pygame.draw.circle(
                                 screen, YELLOW, (posx, int(SQUARESIZE/2)), RADIUS)
-
-                pygame.display.update()
+                    redraw_buttons_hover(posx, posy)
+                pygame.display.flip()
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     posx, posy = event.pos
@@ -294,9 +310,11 @@ def game():
                                 board, col), col, PLAYER_PIECE)
                             draw_board(board)
                             if winning_move(board, PLAYER_PIECE):
+                                draw_board(board)
                                 label = myfont.render("RED wins!!", 1, BLACK)
                                 screen.blit(label, (20, 10))
                                 game_over = True
+                                pygame.time.wait(3000)
                                 break
                             draw_board(board)
 
@@ -327,9 +345,11 @@ def game():
                     drop_piece(board, get_next_open_row(
                         board, col), col, AI_PIECE)
                     if winning_move(board, AI_PIECE):
+                        draw_board(board)
                         label = myfont.render("YELLOW wins!!", 1, BLACK)
                         screen.blit(label, (200, 10))
                         game_over = True
+                        pygame.time.wait(3000)
                         break
 
                     draw_board(board)
