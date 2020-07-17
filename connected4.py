@@ -256,8 +256,7 @@ def redraw_buttons_hover(posx, posy):
     button_hover(posx, posy, 790, 100, 120, 60, 'Easy')
     button_hover(posx, posy, 790, 200, 120, 60, 'Medium')
     button_hover(posx, posy, 790, 300, 120, 60, 'Hard')
-
-    
+  
 pygame.init()
 SQUARESIZE = 100
 width = COLUMN * SQUARESIZE
